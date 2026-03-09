@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ title or 'מערכת ניטור תשדירי רדיו' }}</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <h2>ניטור רדיו</h2>
+      <nav>
+        <a href="/dashboard">דאשבורד</a>
+        <a href="/ads">תשדירים</a>
+        <a href="/detections">זיהויים</a>
+        <a href="/settings">הגדרות</a>
+        <a href="/logout">התנתק</a>
+      </nav>
+    </aside>
+    <main class="main">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</body>
+</html>

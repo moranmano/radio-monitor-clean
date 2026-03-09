@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>דאשבורד</h1>
+<div class="cards">
+  <div class="card"><div class="label">מספר תשדירים</div><div class="value">{{ ads_count }}</div></div>
+  <div class="card"><div class="label">מספר זיהויים</div><div class="value">{{ detections_count }}</div></div>
+  <div class="card"><div class="label">מייל דוחות</div><div class="value small">{{ settings_row.report_email if settings_row else '' }}</div></div>
+  <div class="card"><div class="label">סטרים</div><div class="value small">{{ settings_row.stream_url if settings_row else '' }}</div></div>
+</div>
+
+<h2>זיהויים אחרונים</h2>
+<table>
+  <thead>
+    <tr>
+      <th>תשדיר</th>
+      <th>זמן</th>
+      <th>ודאות</th>
+      <th>הוכחה</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in latest_detections %}
+    <tr>
+      <td>{{ row.ad_name_snapshot }}</td>
+      <td>{{ row.detected_at }}</td>
+      <td>{{ '%.2f%%'|format(row.confidence * 100) }}</td>
+      <td>{% if row.evidence_public_url %}<a href="{{ row.evidence_public_url }}" target="_blank">פתח</a>{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

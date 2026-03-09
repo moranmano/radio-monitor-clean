@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>תשדירים</h1>
+<div class="panel">
+  <h2>העלאת תשדיר חדש</h2>
+  <form method="post" action="/ads/upload" enctype="multipart/form-data">
+    <label>שם תשדיר</label>
+    <input type="text" name="name" required />
+
+    <label>תיאור</label>
+    <textarea name="description"></textarea>
+
+    <label>קובץ אודיו</label>
+    <input type="file" name="file" accept=".mp3,.wav,.m4a,.flac,.ogg" required />
+
+    <button type="submit">העלה</button>
+  </form>
+</div>
+
+<h2>רשימת תשדירים</h2>
+<table>
+  <thead>
+    <tr>
+      <th>שם</th>
+      <th>קובץ</th>
+      <th>אורך</th>
+      <th>סטטוס</th>
+      <th>פעולה</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for ad in ads %}
+    <tr>
+      <td>{{ ad.name }}</td>
+      <td>{{ ad.original_filename }}</td>
+      <td>{{ '%.1f שניות'|format(ad.duration_seconds or 0) }}</td>
+      <td>{{ 'פעיל' if ad.is_active else 'כבוי' }}</td>
+      <td>
+        <form method="post" action="/ads/{{ ad.id }}/toggle">
+          <button type="submit">{{ 'כבה' if ad.is_active else 'הפעל' }}</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
