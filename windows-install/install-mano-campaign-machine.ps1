@@ -131,17 +131,25 @@ $Before = Get-StartupSnapshot
 Save-Snapshot $Before 'before'
 
 try {
-    # 1. Extract zip (flatten a single top-level folder if the zip has one)
+    # 1. Extract zip. The app root is the shallowest folder holding start.bat
+    #    (any nesting depth; __MACOSX and similar junk folders are ignored).
     Say "Extracting $ZipPath -> $InstallDir"
     $tmp = Join-Path $env:TEMP "mcm-extract-$Stamp"
     Expand-Archive -LiteralPath $ZipPath -DestinationPath $tmp -Force
-    $root = $tmp
-    $top  = @(Get-ChildItem -LiteralPath $tmp -Force)
-    if ($top.Count -eq 1 -and $top[0].PSIsContainer) { $root = $top[0].FullName }
+    $all  = @(Get-ChildItem -LiteralPath $tmp -Recurse -Force -File | Where-Object { $_.FullName -notmatch '\\__MACOSX\\' })
+    $hit  = @($all | Where-Object { $_.Name -ieq 'start.bat' } | Sort-Object { $_.FullName.Split('\').Count })
+    if ($hit.Count -eq 0) {
+        $bats = ($all | Where-Object { $_.Extension -ieq '.bat' } | ForEach-Object { $_.FullName.Substring($tmp.Length + 1) }) -join ', '
+        if (-not $bats) { $bats = 'none' }
+        Remove-Item -LiteralPath $tmp -Recurse -Force
+        throw "start.bat is not in the zip. .bat files found in the zip: $bats"
+    }
+    $root = $hit[0].DirectoryName
+    Say "App root inside zip: $($root.Substring($tmp.Length).TrimStart('\'))"
     Get-ChildItem -LiteralPath $root -Force | Copy-Item -Destination $InstallDir -Recurse -Force
     Remove-Item -LiteralPath $tmp -Recurse -Force
     foreach ($f in 'requirements.txt', 'start.bat', 'tests') {
-        if (-not (Test-Path -LiteralPath (Join-Path $InstallDir $f))) { throw "Missing after extract: $f" }
+        if (-not (Test-Path -LiteralPath (Join-Path $InstallDir $f))) { throw "Missing after extract: $f (app root: $root)" }
     }
     $Installed.Add("App extracted to $InstallDir")
 
